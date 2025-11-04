@@ -5,42 +5,47 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
-
-commands := map[string]cliCommand{
-			"exit": {
-				name:		 "exit",
-				description: "Exit the Pokedex",
-				callback:	 commandExit,	
-			},
 
 func cleanInput(text string) []string {
 	re := regexp.MustCompile(`[A-Za-zÀ-ÿ]+`)
 	return re.FindAllString(text, -1)
 }
 
-func commandExit() error {
-	fmt.Println("Closing the Pokedex... Goodbye!")
-	os.Exit(0)
-	return nil
-}
-
 func main() {
 	reader := os.Stdin
 	scanner := bufio.NewScanner(reader)
+
 	for {
 
-		fmt.Printf("Pokedex > ")
+		fmt.Print("Pokedex > ")
 
 		if !scanner.Scan() {
-			break
+			if err := scanner.Err(); err != nil {
+				fmt.Fprintln(os.Stderr, "read error", err)
+			}
+			return
 		}
 
-		text := cleanInput(scanner.Text())
-
-		if len(text) == 0 {
+		tokens := cleanInput(scanner.Text())
+		if len(tokens) == 0 {
 			continue
 		}
+
+		switch strings.ToLower(tokens[0]) {
+		case "exit":
+			buildRegistry("exit").Callback()
+			continue
+
+		case "help":
+			buildRegistry("help").Callback()
+			continue
+
+		default:
+			fmt.Println("Unknown command")
+			continue
+
 		}
 	}
 }
