@@ -5,8 +5,14 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 )
+
+commands := map[string]cliCommand{
+			"exit": {
+				name:		 "exit",
+				description: "Exit the Pokedex",
+				callback:	 commandExit,	
+			},
 
 func cleanInput(text string) []string {
 	re := regexp.MustCompile(`[A-Za-zÀ-ÿ]+`)
@@ -35,7 +41,6 @@ func main() {
 		if len(text) == 0 {
 			continue
 		}
-
-		fmt.Printf("Your command was: %v\n", strings.ToLower(text[0]))
+		}
 	}
 }
