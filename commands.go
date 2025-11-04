@@ -9,6 +9,12 @@ import (
 	"os"
 )
 
+type cliCommand struct {
+	Name        string
+	Description string
+	Callback    func(*Config)
+}
+
 type Config struct {
 	Next     string `json:"next"`
 	Previous string `json:"previous"`
@@ -16,12 +22,6 @@ type Config struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"results"`
-}
-
-type cliCommand struct {
-	Name        string
-	Description string
-	Callback    func()
 }
 
 func buildRegistry(command string) cliCommand {
@@ -58,75 +58,82 @@ func buildRegistry(command string) cliCommand {
 	}
 }
 
-func commandExit( /*config *config*/ ) {
+func commandExit(_ *Config) {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 }
 
-func commandHelp( /*config *config*/ ) {
-	fmt.Println(`
+func commandHelp(_ *Config) {
+	fmt.Print(`
 Welcome to the Pokedex!
 Usage:
 	
 help: Displays a help message
 exit: Exit the Pokedex
+map:  Show 20 locations
+mapb: Show the previous 20 locations
+
 `)
 }
 
-func commandMap() {
-
-	res, err := http.Get("https://pokeapi.co/api/v2/location-area/")
+func fetchLocationAreaPage(url string) (Config, error) {
+	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return Config{}, err
 	}
-
-	body, err := io.ReadAll(res.Body)
 	defer res.Body.Close()
 
-	var maps Config
-
-	if err := json.Unmarshal(body, &maps); err != nil {
-		log.Fatal(err)
-	}
-
-	for _, loc := range maps.Results {
-		fmt.Println(loc.Name)
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return Config{}, err
 	}
 
 	if res.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
-	}
-	if err != nil {
-		log.Fatal(err)
+		return Config{}, fmt.Errorf("bad status %d\n%s", res.StatusCode, body)
 	}
 
+	var page Config
+
+	if err := json.Unmarshal(body, &page); err != nil {
+		return Config{}, err
+	}
+	return page, nil
 }
 
-func commandMapb() {
+func commandMap(cfg *Config) {
+	url := cfg.Next
+	if url == "" {
+		url = "https://pokeapi.co/api/v2/location-area/"
+	}
 
-	res, err := http.Get("https://pokeapi.co/api/v2/location-area/")
+	page, err := fetchLocationAreaPage(url)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	body, err := io.ReadAll(res.Body)
-	defer res.Body.Close()
-
-	var maps Config
-
-	if err := json.Unmarshal(body, &maps); err != nil {
-		log.Fatal(err)
-	}
-
-	for _, loc := range maps.Previous.Results {
+	for _, loc := range page.Results {
 		fmt.Println(loc.Name)
 	}
 
-	if res.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
+	cfg.Next = page.Next
+	cfg.Previous = page.Previous
+}
+
+func commandMapb(cfg *Config) {
+	if cfg.Previous == "" {
+		fmt.Println("No previous page")
+		return
 	}
+
+	page, err := fetchLocationAreaPage(cfg.Previous)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	for _, loc := range page.Results {
+		fmt.Println(loc.Name)
+	}
+
+	cfg.Next = page.Next
+	cfg.Previous = page.Previous
 }

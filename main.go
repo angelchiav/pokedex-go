@@ -17,6 +17,11 @@ func main() {
 	reader := os.Stdin
 	scanner := bufio.NewScanner(reader)
 
+	cfg := &Config{
+		Next:     "https://pokeapi.co/api/v2/location-area/",
+		Previous: "",
+	}
+
 	for {
 
 		fmt.Print("Pokedex > ")
@@ -35,19 +40,19 @@ func main() {
 
 		switch strings.ToLower(tokens[0]) {
 		case "exit":
-			buildRegistry("exit").Callback()
+			buildRegistry("exit").Callback(cfg)
 			continue
 
 		case "help":
-			buildRegistry("help").Callback()
+			buildRegistry("help").Callback(cfg)
 			continue
 
 		case "map":
-			buildRegistry("map").Callback()
+			buildRegistry("map").Callback(cfg)
 			continue
 
 		case "mapb":
-			buildRegistry("mapb").Callback()
+			buildRegistry("mapb").Callback(cfg)
 			continue
 
 		default:
