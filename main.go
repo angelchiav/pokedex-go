@@ -42,6 +42,14 @@ func main() {
 			buildRegistry("help").Callback()
 			continue
 
+		case "map":
+			buildRegistry("map").Callback()
+			continue
+
+		case "mapb":
+			buildRegistry("mapb").Callback()
+			continue
+
 		default:
 			fmt.Println("Unknown command")
 			continue
