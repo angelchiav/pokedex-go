@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"regexp"
+	"strings"
 )
 
 func cleanInput(text string) []string {
@@ -10,6 +13,29 @@ func cleanInput(text string) []string {
 	return re.FindAllString(text, -1)
 }
 
+func commandExit() error {
+	fmt.Println("Closing the Pokedex... Goodbye!")
+	os.Exit(0)
+	return nil
+}
+
 func main() {
-	fmt.Println(cleanInput("La mamá de la mamá"))
+	reader := os.Stdin
+	scanner := bufio.NewScanner(reader)
+	for {
+
+		fmt.Printf("Pokedex > ")
+
+		if !scanner.Scan() {
+			break
+		}
+
+		text := cleanInput(scanner.Text())
+
+		if len(text) == 0 {
+			continue
+		}
+
+		fmt.Printf("Your command was: %v\n", strings.ToLower(text[0]))
+	}
 }
