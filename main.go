@@ -56,7 +56,7 @@ func main() {
 			continue
 
 		default:
-			fmt.Println("Unknown command")
+			fmt.Println("Unknown command.  Write 'help' to learn the commands.")
 			continue
 
 		}
