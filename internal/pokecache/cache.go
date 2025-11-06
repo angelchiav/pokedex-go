@@ -9,6 +9,7 @@ type Cache struct {
 	data map[string]cacheEntry
 	mu   sync.RWMutex
 	ttl  time.Duration
+	done chan struct{}
 }
 
 type cacheEntry struct {
@@ -43,4 +44,36 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 	}
 
 	return item.Val, found
+}
+
+func (c *Cache) Set(key string, val []byte) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.data[key] = cacheEntry{
+		Val:       []byte(key),
+		createdAt: time.Now(),
+	}
+}
+
+func (c *Cache) reapLoop() {
+	ticker := time.NewTicker(c.ttl)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			now := time.Now()
+			c.mu.Lock()
+			defer c.mu.Unlock()
+
+			for key, item := range c.data {
+				if now.Sub(item.createdAt) > c.ttl {
+					delete(c.data, key)
+				}
+			}
+		case <-c.done:
+			return
+		}
+	}
 }
