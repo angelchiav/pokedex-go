@@ -39,6 +39,7 @@ func main() {
 		}
 
 		switch strings.ToLower(tokens[0]) {
+
 		case "exit":
 			buildRegistry("exit").Callback(cfg)
 			continue

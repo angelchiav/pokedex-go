@@ -77,6 +77,7 @@ mapb: Show the previous 20 locations
 }
 
 func fetchLocationAreaPage(url string) (Config, error) {
+
 	res, err := http.Get(url)
 	if err != nil {
 		return Config{}, err
