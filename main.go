@@ -57,6 +57,15 @@ func main() {
 		case "explore":
 			buildRegistry("explore").Callback(cfg, tokens[1:]...)
 
+		case "catch":
+			buildRegistry("catch").Callback(cfg, tokens[1:]...)
+
+		case "inspect":
+			buildRegistry("inspect").Callback(cfg, tokens[1:]...)
+
+		case "pokedex":
+			buildRegistry("pokedex").Callback(cfg, tokens[1:]...)
+
 		default:
 			fmt.Println("Unknown command.  Write 'help' to learn the commands.")
 			continue
