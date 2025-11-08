@@ -17,19 +17,23 @@ type cacheEntry struct {
 	Val       []byte
 }
 
-func NewCache(ttl time.Duration) Cache {
-	return Cache{
+func NewCache(ttl time.Duration) *Cache {
+	c := &Cache{
 		data: make(map[string]cacheEntry),
 		ttl:  ttl,
+		done: make(chan struct{}),
 	}
+	go c.reapLoop()
+	return c
 }
 
 func (c *Cache) Add(key string, val []byte) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	buf := append([]byte(nil), val...)
 	c.data[key] = cacheEntry{
-		Val:       val,
+		Val:       buf,
 		createdAt: time.Now(),
 	}
 }
@@ -43,17 +47,31 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 		return nil, false
 	}
 
-	return item.Val, found
+	return append([]byte(nil), item.Val...), true
 }
 
 func (c *Cache) Set(key string, val []byte) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
+	buf := append([]byte(nil), val...)
+
 	c.data[key] = cacheEntry{
-		Val:       []byte(key),
+		Val:       buf,
 		createdAt: time.Now(),
 	}
+}
+
+func (c *Cache) Close() {
+	if c == nil {
+		return
+	}
+	select {
+	case <-c.done:
+		return
+	default:
+	}
+	close(c.done)
 }
 
 func (c *Cache) reapLoop() {
