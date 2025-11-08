@@ -215,7 +215,7 @@ func commandExplore(cfg *Config, args ...string) {
 	}
 
 	area := strings.ToLower(args[0])
-	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s", area)
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%s/", area)
 	d, err := fetchLocationAreaDetail(url)
 	if err != nil {
 		log.Fatal(err)

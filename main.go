@@ -4,13 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 )
 
 func cleanInput(text string) []string {
-	re := regexp.MustCompile(`[A-Za-zÀ-ÿ]+`)
-	return re.FindAllString(text, -1)
+	return strings.Fields(text)
 }
 
 func main() {
@@ -41,20 +39,23 @@ func main() {
 		switch strings.ToLower(tokens[0]) {
 
 		case "exit":
-			buildRegistry("exit").Callback(cfg)
+			buildRegistry("exit").Callback(cfg, tokens[1:]...)
 			continue
 
 		case "help":
-			buildRegistry("help").Callback(cfg)
+			buildRegistry("help").Callback(cfg, tokens[1:]...)
 			continue
 
 		case "map":
-			buildRegistry("map").Callback(cfg)
+			buildRegistry("map").Callback(cfg, tokens[1:]...)
 			continue
 
 		case "mapb":
-			buildRegistry("mapb").Callback(cfg)
+			buildRegistry("mapb").Callback(cfg, tokens[1:]...)
 			continue
+
+		case "explore":
+			buildRegistry("explore").Callback(cfg, tokens[1:]...)
 
 		default:
 			fmt.Println("Unknown command.  Write 'help' to learn the commands.")

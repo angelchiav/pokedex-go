@@ -83,13 +83,13 @@ func (c *Cache) reapLoop() {
 		case <-ticker.C:
 			now := time.Now()
 			c.mu.Lock()
-			defer c.mu.Unlock()
 
 			for key, item := range c.data {
 				if now.Sub(item.createdAt) > c.ttl {
 					delete(c.data, key)
 				}
 			}
+			c.mu.Unlock()
 		case <-c.done:
 			return
 		}
