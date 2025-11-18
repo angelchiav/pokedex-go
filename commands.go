@@ -381,8 +381,8 @@ func commandInspect(cfg *Config, args ...string) {
 	}
 
 	fmt.Printf("Name: %s\n", p.Name)
-	fmt.Printf("Height: %d decimeters\n", p.Height)
-	fmt.Printf("Weight: %d hectograms\n", p.Weight)
+	fmt.Printf("Height: %.2f meters\n", float64(p.Height)/10)
+	fmt.Printf("Weight: %.1f kilograms\n", float64(p.Weight)/10)
 	fmt.Println("Stats:")
 	for _, s := range p.Stats {
 		fmt.Printf("  -%s: %d\n", strings.ToLower(s.Stat.Name), s.BaseStat)
